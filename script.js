@@ -1,24 +1,29 @@
-const canvas = document.getElementById('tetris');
+const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
-const holdCanvas = document.getElementById('hold');
-const holdContext = holdCanvas.getContext('2d');
+const holdCanvas = document.getElementById("hold");
+const holdContext = holdCanvas.getContext("2d");
 holdContext.scale(20, 20);
 
 const arenaWidth = 12;
 const arenaHeight = 20;
 const arena = createMatrix(arenaWidth, arenaHeight);
 
+const nextCanvas = document.getElementById("next");
+const nextContext = nextCanvas.getContext("2d");
+nextContext.scale(20, 20);
+
+
 const colors = [
   null,
-  '#FF0D72', // T
-  '#0DC2FF', // O
-  '#0DFF72', // L
-  '#F538FF', // J
-  '#FF8E0D', // I
-  '#FFE138', // S
-  '#3877FF'  // Z
+  "#FF0D72", // T
+  "#0DC2FF", // O
+  "#0DFF72", // L
+  "#F538FF", // J
+  "#FF8E0D", // I
+  "#FFE138", // S
+  "#3877FF" // Z
 ];
 
 let dropCounter = 0;
@@ -33,9 +38,11 @@ let holdMatrix = null;
 let holdUsed = false;
 let bag = [];
 
+let nextPiece = null;
+
 const player = {
   pos: { x: 0, y: 0 },
-  matrix: null,
+  matrix: null
 };
 
 function createMatrix(w, h) {
@@ -48,13 +55,48 @@ function createMatrix(w, h) {
 
 function createPiece(type) {
   switch (type) {
-    case 'T': return [[0, 1, 0],[1, 1, 1],[0, 0, 0]];
-    case 'O': return [[2, 2],[2, 2]];
-    case 'L': return [[0, 0, 3],[3, 3, 3],[0, 0, 0]];
-    case 'J': return [[4, 0, 0],[4, 4, 4],[0, 0, 0]];
-    case 'I': return [[0, 0, 0, 0],[5, 5, 5, 5],[0, 0, 0, 0],[0, 0, 0, 0]];
-    case 'S': return [[0, 6, 6],[6, 6, 0],[0, 0, 0]];
-    case 'Z': return [[7, 7, 0],[0, 7, 7],[0, 0, 0]];
+    case "T":
+      return [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ];
+    case "O":
+      return [
+        [2, 2],
+        [2, 2]
+      ];
+    case "L":
+      return [
+        [0, 0, 3],
+        [3, 3, 3],
+        [0, 0, 0]
+      ];
+    case "J":
+      return [
+        [4, 0, 0],
+        [4, 4, 4],
+        [0, 0, 0]
+      ];
+    case "I":
+      return [
+        [0, 0, 0, 0],
+        [5, 5, 5, 5],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ];
+    case "S":
+      return [
+        [0, 6, 6],
+        [6, 6, 0],
+        [0, 0, 0]
+      ];
+    case "Z":
+      return [
+        [7, 7, 0],
+        [0, 7, 7],
+        [0, 0, 0]
+      ];
   }
 }
 
@@ -76,8 +118,12 @@ function drawHold() {
   holdContext.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
   if (holdMatrix) {
     const cellSize = 1;
-    const offsetX = Math.floor((holdCanvas.width / 20 - holdMatrix[0].length) / 2);
-    const offsetY = Math.floor((holdCanvas.height / 20 - holdMatrix.length) / 2);
+    const offsetX = Math.floor(
+      (holdCanvas.width / 20 - holdMatrix[0].length) / 2
+    );
+    const offsetY = Math.floor(
+      (holdCanvas.height / 20 - holdMatrix.length) / 2
+    );
     drawMatrix(holdMatrix, holdContext, { x: offsetX, y: offsetY });
   }
 }
@@ -96,6 +142,22 @@ function draw() {
   drawHold();
 }
 
+function drawNext() {
+  nextContext.fillStyle = "#222";
+  nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+  if (nextPiece) {
+    const offsetX = Math.floor(
+      (nextCanvas.width / 20 - nextPiece[0].length) / 2
+    );
+    const offsetY = Math.floor(
+      (nextCanvas.height / 20 - nextPiece.length) / 2
+    );
+    drawMatrix(nextPiece, nextContext, { x: offsetX, y: offsetY });
+  }
+}
+
+
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
@@ -111,8 +173,7 @@ function collide(arena, player) {
   const o = player.pos;
   for (let y = 0; y < m.length; ++y) {
     for (let x = 0; x < m[y].length; ++x) {
-      if (m[y][x] !== 0 &&
-        (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+      if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
         return true;
       }
     }
@@ -149,7 +210,7 @@ function rotate(matrix, dir) {
     }
   }
   if (dir > 0) {
-    matrix.forEach(row => row.reverse());
+    matrix.forEach((row) => row.reverse());
   } else {
     matrix.reverse();
   }
@@ -172,7 +233,7 @@ function playerRotate(dir) {
 }
 
 function generateBag() {
-  const types = ['T', 'O', 'L', 'J', 'I', 'S', 'Z'];
+  const types = ["T", "O", "L", "J", "I", "S", "Z"];
   for (let i = types.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [types[i], types[j]] = [types[j], types[i]];
@@ -181,19 +242,33 @@ function generateBag() {
 }
 
 function playerReset() {
-  if (bag.length === 0) bag = generateBag();
-  const type = bag.pop();
-  player.matrix = createPiece(type);
+  if (player.matrix === null) {
+    if (bag.length === 0) bag = generateBag();
+    const type = bag.pop();
+    player.matrix = createPiece(type);
+  } else {
+    player.matrix = nextPiece;
+  }
+
   player.pos.y = 0;
   player.pos.x = ((arenaWidth / 2) | 0) - ((player.matrix[0].length / 2) | 0);
+
+  // 次のピースをセット
+  if (bag.length === 0) bag = generateBag();
+  const nextType = bag.pop();
+  nextPiece = createPiece(nextType);
 
   holdUsed = false;
 
   if (collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
+    arena.forEach((row) => row.fill(0));
+      holdMatrix = null;
     alert("Game Over");
   }
+
+  drawNext(); //描画更新
 }
+
 
 function arenaSweep() {
   outer: for (let y = arena.length - 1; y >= 0; --y) {
@@ -260,26 +335,25 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-document.addEventListener('keydown', event => {
-  if (event.key === 'ArrowLeft') {
+document.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowLeft") {
     playerMove(-1);
-  } else if (event.key === 'ArrowRight') {
+  } else if (event.key === "ArrowRight") {
     playerMove(1);
-  } else if (event.key === 'ArrowDown') {
+  } else if (event.key === "ArrowDown") {
     playerDrop();
-  } else if (event.key === 'z') {
+  } else if (event.key === "z") {
     playerRotate(-1);
-  } else if (event.key === 'x' || event.key === 'ArrowUp') {
+  } else if (event.key === "x" || event.key === "ArrowUp") {
     playerRotate(1);
-  } else if (event.key === ' ') {
+  } else if (event.key === " ") {
     const ghost = getGhostPosition();
     player.pos.y = ghost.pos.y;
     playerDrop();
-  } else if (event.key === 'c') {
+  } else if (event.key === "c") {
     playerHold();
   }
 });
 
 playerReset();
 update();
-
