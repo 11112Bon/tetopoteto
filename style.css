@@ -1,19 +1,27 @@
 body {
   background: #111;
   color: white;
-  text-align: center;
   font-family: sans-serif;
+  text-align: center;
   margin: 0;
-  padding: 0;
+  padding: 20px;
 }
 
-h1 {
-  margin: 1rem 0;
+#ui {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px; /* 適度な間隔に */
 }
 
-canvas {
+#hold {
   background: #222;
-  display: block;
-  margin: 0 auto;
-  border: 2px solid #555;
+  border: 1px solid #555;
 }
+
+#tetris {
+  background: #333;
+  border: 1px solid #555;
+}
+
+
