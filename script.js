@@ -158,6 +158,7 @@ function drawNext() {
 }
 
 
+
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
